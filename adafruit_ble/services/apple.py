@@ -245,7 +245,7 @@ class _MediaAttribute:
         pass
 
 class _MediaAttributePlaybackState:
-    def __init__(self, entity_id, attribute_id):
+    def __init__(self, attribute_id):
         pass
 
 class _MediaAttributePlaybackInfo:
