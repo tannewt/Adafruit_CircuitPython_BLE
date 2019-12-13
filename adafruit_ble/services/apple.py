@@ -34,6 +34,8 @@ from . import Service
 from ..uuid import VendorUUID
 from ..characteristics.stream import StreamIn, StreamOut
 
+from ..characteristics.apple import RemoteCommand, EntityUpdate, EntityAttribute
+
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_BLE.git"
 
@@ -238,6 +240,93 @@ class AppleNotificationService(Service):
             pass
         return self._active_notifications
 
+class _MediaAttribute:
+    def __init__(self, entity_id, attribute_id):
+        pass
+
+class _MediaAttributePlaybackState:
+    def __init__(self, entity_id, attribute_id):
+        pass
+
+class _MediaAttributePlaybackInfo:
+    def __init__(self, position):
+        pass
+
 class AppleMediaService(Service):
     """View and control currently playing media. Unimplemented."""
     uuid = VendorUUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC")
+
+    _remote_command = RemoteCommand()
+    _entity_update = EntityUpdate()
+    _entity_attribute = EntityAttribute()
+
+    player_name = _MediaAttribute(0, 0)
+    paused = _MediaAttributePlaybackState(0)
+    playing = _MediaAttributePlaybackState(1)
+    rewinding = _MediaAttributePlaybackState(2)
+    fast_forwarding = _MediaAttributePlaybackState(3)
+    playback_rate = _MediaAttributePlaybackInfo(2)
+    elapsed_time = _MediaAttributePlaybackInfo(3)
+    volume = _MediaAttribute(0, 2)
+
+    queue_index = _MediaAttribute(1, 0)
+    queue_length = _MediaAttribute(1, 1)
+    shuffle_mode = _MediaAttribute(1, 2)
+    repeat_mode = _MediaAttribute(1, 3)
+
+    artist = _MediaAttribute(2, 0)
+    album = _MediaAttribute(2, 1)
+    title = _MediaAttribute(2, 2)
+    duration = _MediaAttribute(2, 3)
+
+    def wait_for_next_track(self):
+        pass
+
+    def _send_command(self, command_id):
+        if command_id not in self._remote_command:
+            return
+        buf = bytearray(1)
+        buf[0] = command_id
+        self._remote_command = buf
+
+    def play(self):
+        self._send_command(0)
+
+    def pause(self):
+        self._send_command(1)
+
+    def toggle_play_pause(self):
+        self._send_command(2)
+
+    def next_track(self):
+        self._send_command(3)
+
+    def previous_track(self):
+        self._send_command(4)
+
+    def volume_up(self):
+        self._send_command(5)
+
+    def volume_down(self):
+        self._send_command(6)
+
+    def advance_repeat_mode(self):
+        self._send_command(7)
+
+    def advance_shuffle_mode(self):
+        self._send_command(8)
+
+    def skip_forward(self):
+        self._send_command(9)
+
+    def skip_backward(self):
+        self._send_command(10)
+
+    def like_track(self):
+        self._send_command(11)
+
+    def dislike_track(self):
+        self._send_command(12)
+
+    def bookmark_track(self):
+        self._send_command(13)
